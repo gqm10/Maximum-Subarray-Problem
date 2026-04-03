@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maximum Subarray Problem</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="assest/logo.png">
+</head>
+
+<body>
+  <div id="app">
+
+    <header id="header">
+      <img src="assest/logo.png" style="width: 100px;height: 30px;">
+      <h1>Maximum Subarray </h1>
+      <span class="badge">Interactive Visualizer</span>
+      <div class="spacer"></div>
+      <div class="complexity-pills">
+        <span class="cpill bf">BF O(n³)</span>
+        <span class="cpill dc">D&C O(n log n)</span>
+        <span class="cpill ka">Kadane O(n)</span>
+      </div>
+    </header>
+
+    <aside id="left">
+
+      <div class="panel-section">
+        <h3>Algorithm</h3>
+        <div class="algo-tabs">
+          <div class="algo-tab bf active" data-algo="bf">
+            <span class="algo-big">BF</span>
+            <span>Brute Force</span>
+            <span class="algo-cplx">O(n³) · O(1)</span>
+          </div>
+          <div class="algo-tab dc" data-algo="dc">
+            <span class="algo-big">D&C</span>
+            <span>Divide & Conquer</span>
+            <span class="algo-cplx">O(n log n) · O(log n)</span>
+          </div>
+          <div class="algo-tab ka" data-algo="ka">
+            <span class="algo-big">KA</span>
+            <span>Kadane's</span>
+            <span class="algo-cplx">O(n) · O(1)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <h3>Input Array</h3>
+        <div class="input-row">
+          <label>Values:</label>
+          <input id="customInput" type="text" value="-2,1,-3,4,-1,2,1,-5,4" placeholder="e.g. -2,1,-3,4">
+          <button class="btn primary" onclick="buildSteps()">Build</button>
+        </div>
+        <div class="input-row">
+          <label>Presets:</label>
+          <div class="preset-row">
+            <button class="preset-btn" onclick="setPreset(0)">Classic</button>
+            <button class="preset-btn" onclick="setPreset(1)">All Neg</button>
+            <button class="preset-btn" onclick="setPreset(2)">All Pos</button>
+            <button class="preset-btn" onclick="setPreset(3)">Zigzag</button>
+            <button class="preset-btn" onclick="setPreset(4)">Worst BF</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <h3>Playback</h3>
+        <div class="controls-row">
+          <button class="ctl-btn" title="Step Back" onclick="stepBack()">◁</button>
+          <button class="ctl-btn" title="Step Forward" onclick="stepForward()">▷</button>
+          <button class="ctl-btn play" id="playBtn" title="Play" onclick="togglePlay()">▶</button>
+          <button class="ctl-btn reset" title="Reset" onclick="reset()">↺</button>
+          <span style="flex:1"></span>
+          <span id="stepCounter" style="font-family:var(--mono);font-size:10px;color:var(--text2)">0 / 0</span>
+        </div>
+        <div class="speed-row">
+          <label>Speed:</label>
+          <input id="speedSlider" type="range" min="1" max="8" step="1" value="4" oninput="updateSpeed()">
+          <span id="speedVal">1×</span>
+        </div>
+        <div id="statusIndicator" style="margin-top:8px">
+          <span class="status-dot" id="statusDot"></span>
+          <span id="statusText">Ready — Build steps to begin</span>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <h3>Live Statistics</h3>
+        <div class="status-grid">
+          <div class="stat-box">
+            <div class="label">Step</div>
+            <div class="value accent" id="statStep">—</div>
+          </div>
+          <div class="stat-box">
+            <div class="label">Operations</div>
+            <div class="value orange" id="statOps">0</div>
+          </div>
+          <div class="stat-box">
+            <div class="label">Max Sum</div>
+            <div class="value green" id="statMax">—</div>
+          </div>
+          <div class="stat-box">
+            <div class="label">Curr Sum</div>
+            <div class="value" id="statCurr">—</div>
+          </div>
+        </div>
+        <div class="op-bars" id="opBars" style="margin-top:6px"></div>
+      </div>
+
+      <div class="panel-section">
+        <h3>Pseudocode</h3>
+        <div id="pseudocode"></div>
+      </div>
+
+      <div class="panel-section">
+        <h3>Step Explanation</h3>
+        <div id="stepExplain">
+          <div class="step-title">Awaiting execution…</div>
+          <p>Select an algorithm, set your input array, then click <strong>Build Steps</strong> to generate the
+            animation trace. Use Step or Play to walk through it.</p>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <h3>Step History</h3>
+        <div id="stepHistory"></div>
+      </div>
+
+      <div class="collapsible-header" onclick="toggleCollapse(this)">
+        <h3>Problem Overview</h3>
+        <span class="collapse-arrow">▼</span>
+      </div>
+      <div class="collapsible-body hidden">
+        <p><strong>Maximum Subarray Problem:</strong> Given an integer array, find the contiguous subarray with the
+          largest sum.</p>
+        <br>
+        <p><strong>Example:</strong> <code>[-2,1,-3,4,-1,2,1,-5,4]</code> → subarray <code>[4,-1,2,1]</code> has sum
+          <code>6</code>.</p>
+        <br>
+        <p>Three classical approaches are compared here, each with different time/space tradeoffs. The naive Brute Force
+          checks every subarray; Divide &amp; Conquer splits recursively; Kadane's Algorithm scans linearly using a DP
+          insight.</p>
+      </div>
+
+      <div class="collapsible-header" onclick="toggleCollapse(this)">
+        <h3>Key Concepts</h3>
+        <span class="collapse-arrow">▼</span>
+      </div>
+      <div class="collapsible-body hidden">
+        <p><strong>Dynamic Programming (Kadane's):</strong> At each index, the optimal subarray either extends the
+          previous or starts fresh.</p>
+        <br>
+        <p><strong>Divide &amp; Conquer:</strong> The max subarray is either in the left half, right half, or crosses
+          the midpoint. Recurrence: T(n) = 2T(n/2) + O(n).</p>
+        <br>
+        <p><strong>Master Theorem:</strong> T(n)=2T(n/2)+O(n) → O(n log n) by case 2 (a=2, b=2, f(n)=n, log_b(a)=1).</p>
+        <br>
+        <p><strong>Crossing subarray:</strong> Found by expanding outward from midpoint. Must check left suffix max +
+          right prefix max.</p>
+      </div>
+
+    </aside>
+
+    <main id="right">
+
+      <div id="vizTabs">
+        <div class="viz-tab active" data-panel="array">Array View</div>
+        <div class="viz-tab" data-panel="dc">D&C Tree</div>
+        <div class="viz-tab" data-panel="kadane">Kadane Trace</div>
+        <div class="viz-tab" data-panel="complexity">Complexity</div>
+      </div>
+
+      <div id="vizPanels">
+
+        <div class="viz-panel active" id="panel-array">
+          <div class="info-row">
+            <div class="info-card" style="flex:2">
+              <h4>Legend</h4>
+              <div class="legend">
+                <div class="legend-item"><span class="legend-swatch" style="background:var(--bar-pos)"></span>Positive
+                  value</div>
+                <div class="legend-item"><span class="legend-swatch" style="background:var(--bar-neg)"></span>Negative
+                  value</div>
+                <div class="legend-item"><span class="legend-swatch" style="background:var(--bar-active)"></span>Active
+                  window</div>
+                <div class="legend-item"><span class="legend-swatch" style="background:var(--bar-max)"></span>Global
+                  maximum</div>
+                <div class="legend-item"><span class="legend-swatch" style="background:var(--bar-left)"></span>Left half
+                  (D&C)</div>
+                <div class="legend-item"><span class="legend-swatch" style="background:var(--bar-right)"></span>Right
+                  half (D&C)</div>
+                <div class="legend-item"><span class="legend-swatch" style="background:var(--bar-cross)"></span>Crossing
+                  (D&C)</div>
+              </div>
+            </div>
+            <div class="info-card">
+              <h4>Result</h4>
+              <div id="resultDisplay" style="font-family:var(--mono);font-size:12px;color:var(--text2)">
+                Run algorithm to see result
+              </div>
+            </div>
+          </div>
+
+          <div id="chartWrap">
+            <h4>Array Visualization — Bar Chart</h4>
+            <svg id="arraySvg" height="200"></svg>
+            <svg id="subarraySvg" height="40"></svg>
+          </div>
+
+          <div id="dcMergeWrap" style="display:none" class="info-card">
+            <h4>Divide & Conquer — Current Split</h4>
+            <div id="dcMergeInfo" style="font-family:var(--mono);font-size:11px;color:var(--text2)"></div>
+          </div>
+        </div>
+
+        <div class="viz-panel" id="panel-dc">
+          <div id="dcTreeWrap">
+            <h4>Recursion Tree — Divide & Conquer</h4>
+            <svg id="dcTreeSvg" height="400"></svg>
+          </div>
+          <div class="info-row">
+            <div class="info-card">
+              <h4>Recursion Depth</h4>
+              <div id="dcDepthDisplay"
+                style="font-family:var(--mono);font-size:24px;font-weight:700;color:var(--purple)">—</div>
+            </div>
+            <div class="info-card" style="flex:2">
+              <h4>Merge Step Explanation</h4>
+              <div id="dcMergeExplain"
+                style="font-family:var(--mono);font-size:11px;color:var(--text2);line-height:1.6">
+                The crossing subarray is found by expanding left from mid and right from mid+1, accumulating max
+                suffix/prefix sums.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="viz-panel" id="panel-kadane">
+          <div class="info-card">
+            <h4>Kadane's Algorithm — Variable Trace</h4>
+            <div class="kadane-trace">
+              <div class="trace-row header">
+                <span>i</span>
+                <span>arr[i]</span>
+                <span>curr_max</span>
+                <span>global_max</span>
+                <span>decision</span>
+              </div>
+              <div id="kadaneTraceBody"></div>
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-card">
+              <h4>Key Insight</h4>
+              <p><strong>curr_max = max(arr[i], curr_max + arr[i])</strong><br><br>
+                If adding the current element to the running sum is worse than starting fresh from the current element,
+                we reset. This is the DP recurrence that makes Kadane's O(n).</p>
+            </div>
+            <div class="info-card">
+              <h4>Space Complexity</h4>
+              <p>Kadane's uses <strong>O(1)</strong> extra space — only two variables: <code>curr_max</code> and
+                <code>global_max</code>. No auxiliary arrays or recursion stack needed. This is optimal.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="viz-panel" id="panel-complexity">
+          <div id="complexityWrap" style="flex:1;min-height:340px">
+            <h4>Empirical vs Theoretical Growth — Operations vs Input Size</h4>
+            <svg id="complexitySvg"></svg>
+          </div>
+          <div class="info-row">
+            <div class="info-card">
+              <h4>Brute Force</h4>
+              <p>Time: <strong style="color:var(--red)">O(n³)</strong> — Three nested loops: outer two pick start/end;
+                inner accumulates sum.<br>Space: <strong>O(1)</strong></p>
+            </div>
+            <div class="info-card">
+              <h4>Divide & Conquer</h4>
+              <p>Time: <strong style="color:var(--purple)">O(n log n)</strong> — Recurrence T(n)=2T(n/2)+O(n).<br>Space:
+                <strong>O(log n)</strong> — call stack.</p>
+            </div>
+            <div class="info-card">
+              <h4>Kadane's</h4>
+              <p>Time: <strong style="color:var(--green)">O(n)</strong> — Single left-to-right scan.<br>Space:
+                <strong>O(1)</strong> — Two variables.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+  <div class="tooltip" id="tooltip"></div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
